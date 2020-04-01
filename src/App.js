@@ -29,16 +29,21 @@ const PlayAgain = props => (
   </div>
 );
 
-const StarMatch = () => {
+const Game = (props) => {
+  //State hooks: basically function as a setter/getter. Equivalent to creating
+  //a constructor and passing in this.state = on a class component.
   const [stars, setStars] = useState(utils.random(1, 9));
 
   const [availableNums, setAvailableNums] = useState(utils.range(1,9));
   const [candidateNums, setCandidateNums] = useState([]);
   const [secondsLeft, setSecondsLeft] = useState(10);
 
-  //useEffect runs every time the component renders
+  //useEffect runs every time the component renders, used for creating side-effects. 
+  //Works like a combined componentDidMount, componentDidUpdate and componentWillUnmount
+  //The return statement runs after the render, allowing for cleanup (componentWillUnmount.)
   useEffect(() => {
     if (secondsLeft > 0) {
+      //setTimeout is a built in js function that waits to execute a function.
       const timerId = setTimeout(() => {
         setSecondsLeft(secondsLeft - 1);
       }, 1000);
@@ -50,12 +55,6 @@ const StarMatch = () => {
 
   const gameStatus = availableNums.length === 0 ? 'won' :
   secondsLeft === 0 ? 'lost' : 'active'
-
-  const resetGame = () => {
-    setStars(utils.random(1, 9));
-    setAvailableNums(utils.range(1,9));
-    setCandidateNums([]);
-  };
 
   const numberStatus = (number) => {
     if (!availableNums.includes(number)) {
@@ -79,6 +78,7 @@ const StarMatch = () => {
       setCandidateNums(newCandidateNums);
     }
     else {
+      //filter creates a new array with all elements that pass a condition
       const newAvailableNums = availableNums.filter(
         n => !newCandidateNums.includes(n)
       );
@@ -99,13 +99,14 @@ const StarMatch = () => {
         <div className="left">
           {gameStatus !== 'active' ? 
           (
-            <PlayAgain onClick={resetGame} gameStatus={gameStatus}/>
+            <PlayAgain onClick={props.startNewGame} gameStatus={gameStatus}/>
           ) : 
           (
             <StarsDisplay count={stars} />
           )} 
         </div>
         <div className="right">
+          {/* Map performs a function on each value in an array */}
           {utils.range(1, 9).map((number) =>
             <StarNumber 
               key={number}
@@ -120,6 +121,11 @@ const StarMatch = () => {
     </div>
   );
 };
+
+const StarMatch = () => {
+  const [gameId, setGameId] = useState(1);
+  return <Game key={gameId} startNewGame={() => setGameId(gameId + 1)}/>;
+}
 
 // Color Theme
 const colors = {
